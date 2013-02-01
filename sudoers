@@ -10,12 +10,14 @@ Defaults	env_reset
 Defaults	secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # Host alias specification
-Host_Alias DEVHOSTS = csdrsapp01,	csdrsdwiki
+Host_Alias DEVHOSTS =hostd1,hostd2,	hostd3,  hostd5
+Host_Alias PRODHOSTS = phost1 ,  phost2,		 phost4
 # User alias specification
-User_Alias DEVS = john,ben,donald
+User_Alias DEVS=john,ben,donald
 User_Alias POWER = eric, dave, tom
 # Cmnd alias specification
-Cmnd_Alias DISK = /sbin/service jboss, /sbin/fdisk -l
+Cmnd_Alias WEBSERVER = /sbin/service jboss, /sbin/service httpd
+Cmnd_Alias READ = /usr/bin/less, /bin/cat, /usr/bin/tail, /usr/bin/head, /bin/more, /bin/ls
 
 # User privilege specification
 root	ALL=(ALL:ALL) ALL
