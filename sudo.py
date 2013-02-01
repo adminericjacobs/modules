@@ -4,11 +4,10 @@ import re
 def ls():
     f = open('/home/ej321278/salt/_modules/sudoers', 'r')
     aliasRE = re.compile("(\w+)(?=\s*?\=)")
-    defaultsRE = re.compile("^\s*Defaults")
-    defaults = {}
+    defaults = []
     ret = {'Host_Alias': {},
            'User_Alias': {},
-           'Cmnd_Alias': {}
+           'Cmnd_Alias': {},
            }
     for line in f.read().splitlines():
         if not line:
@@ -24,8 +23,9 @@ def ls():
                     val[alias] += members
                 else:
                     val[alias] = members
-       # if(defaultsRE.search(line)):
-       #     value = line.split(' ')[1].lstrip()
-       #     ret['Defaults'] += [value]
+        if line.startswith('Defaults'):
+            def_value = line.split('Defaults')[1].lstrip()
+            defaults.append(def_value)
     f.close()
+    ret['Defaults'] = defaults
     return ret
