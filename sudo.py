@@ -2,8 +2,11 @@ import re
 
 
 def append():
-    return "hello"
-
+    f = [line.rstrip() for line in open('sudoers')]
+    new = open('tsudoers', 'w')
+    for item in f:
+        new.write("%s\n" % item)
+    new.close()
 
 def ls():
     f = open('/home/ej321278/salt/_modules/sudoers', 'r')
