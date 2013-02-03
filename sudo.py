@@ -1,15 +1,30 @@
 import re
 
 
-def append():
-    f = [line.rstrip() for line in open('sudoers')]
-    new = open('tsudoers', 'w')
-    for item in f:
-        new.write("%s\n" % item)
-    new.close()
+#def _write_sudoers(elist):
+    #write list to file in /var/lock?
+    # __salt_call__ cmd visudo check for errors
+    # move file and set permissions
+
+
+def _read_sudoers():
+    #make sure file exists
+    f = open('/home/ej321278/salt/_modules/sudoers', 'r')
+    sudolist = [line for line in f.read().splitlines()]
+    f.close()
+    return sudolist
+
+
+#def append():
+#    f = [line.rstrip() for line in open('sudoers')]
+#    new = open('tsudoers', 'w')
+#    for item in f:
+#        new.write("%s\n" % item)
+#    new.close()
+
 
 def ls():
-    f = open('/home/ej321278/salt/_modules/sudoers', 'r')
+    #f = open('/home/ej321278/salt/_modules/sudoers', 'r')
     aliasRE = re.compile("(\w+)(?=\s*?\=)")
     defaults = []
     access = []
@@ -17,7 +32,7 @@ def ls():
            'User_Alias': {},
            'Cmnd_Alias': {},
            }
-    for line in f.read().splitlines():
+    for line in _read_sudoers():
         if not line:
             continue
         if line.startswith('#'):
@@ -39,7 +54,6 @@ def ls():
                     break
         else:
             access.append(line)
-    f.close()
     ret['Defaults'] = defaults
     ret['Access'] = access
     return ret
