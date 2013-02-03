@@ -1,6 +1,10 @@
 import re
 
 
+def append():
+    return "hello"
+
+
 def ls():
     f = open('/home/ej321278/salt/_modules/sudoers', 'r')
     aliasRE = re.compile("(\w+)(?=\s*?\=)")
