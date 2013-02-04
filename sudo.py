@@ -15,16 +15,29 @@ def _read_sudoers():
     return sudolist
 
 
-#def append():
-#    f = [line.rstrip() for line in open('sudoers')]
-#    new = open('tsudoers', 'w')
-#    for item in f:
-#        new.write("%s\n" % item)
-#    new.close()
+def _aliasRE(line):
+    aliasRE = re.compile("(\w+)(?=\s*?\=)")
+    alias = aliasRE.search(line).group(1)
+    return alias
+
+
+def append_user(alias_name, data):
+    aliasRE = re.compile("(\w+)(?=\s*?\=)")
+    new_sudoers = []
+    for line in _read_sudoers():
+        if line.startswith('User_Alias'):
+            alias = aliasRE.search(line).group(1)
+            if alias_name == alias:
+                line += ',' + data
+                new_sudoers.append(line)
+            else:
+                new_sudoers.append(line)
+        else:
+            new_sudoers.append(line)
+    return new_sudoers
 
 
 def ls():
-    #f = open('/home/ej321278/salt/_modules/sudoers', 'r')
     aliasRE = re.compile("(\w+)(?=\s*?\=)")
     defaults = []
     access = []
