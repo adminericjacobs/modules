@@ -1,24 +1,12 @@
 import re
 
 
-#def _write_sudoers(elist):
-    #write list to file in /var/lock?
-    # __salt_call__ cmd visudo check for errors
-    # move file and set permissions
-
-
 def _read_sudoers():
     #make sure file exists
     f = open('/home/ej321278/salt/_modules/sudoers', 'r')
     sudolist = [line for line in f.read().splitlines()]
     f.close()
     return sudolist
-
-
-def _aliasRE(line):
-    aliasRE = re.compile("(\w+)(?=\s*?\=)")
-    alias = aliasRE.search(line).group(1)
-    return alias
 
 
 def append_user(alias_name, data):
@@ -35,6 +23,34 @@ def append_user(alias_name, data):
         else:
             new_sudoers.append(line)
     return new_sudoers
+
+
+def _move_sudoers():
+    return True
+
+
+def _write_sudoers(wlist):
+    f = open('/home/ej321278/salt/_modules/wsudoers', 'w')
+    for line in wlist:
+        f.write("%s\n" % line)
+    f.close()
+
+
+def _flatten(wdict):
+    wlist = []
+    aliases = ['Host_Alias', 'User_Alias', 'Cmnd_Alias']
+    for alias in aliases:
+        if alias in wdict and wdict[alias]:
+            for key, val in wdict[alias].iteritems():
+                line = "%s %s = %s " % (alias, key, ', '.join(val))
+                wlist.append(line)
+    if 'Default' in wdict and wdict['Default']:
+        for line in wdict['Default']:
+            wlist.append(line)
+    if 'Access' in wdict and wdict['Access']:
+        for line in wdict['Access']:
+            wlist.append(line)
+    _write_sudoers(wlist)
 
 
 def ls():
@@ -69,4 +85,5 @@ def ls():
             access.append(line)
     ret['Defaults'] = defaults
     ret['Access'] = access
+    _flatten(ret)
     return ret
