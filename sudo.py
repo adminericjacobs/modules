@@ -44,16 +44,16 @@ def _flatten(wdict):
             for key, val in wdict[alias].iteritems():
                 line = "%s %s = %s " % (alias, key, ', '.join(val))
                 wlist.append(line)
-    if 'Default' in wdict and wdict['Default']:
-        for line in wdict['Default']:
-            wlist.append(line)
+    if 'Defaults' in wdict and wdict['Defaults']:
+        for line in wdict['Defaults']:
+            wlist.append('Defaults ' + line)
     if 'Access' in wdict and wdict['Access']:
         for line in wdict['Access']:
             wlist.append(line)
     _write_sudoers(wlist)
 
 
-def ls():
+def ls(*args):
     aliasRE = re.compile("(\w+)(?=\s*?\=)")
     defaults = []
     access = []
@@ -85,5 +85,10 @@ def ls():
             access.append(line)
     ret['Defaults'] = defaults
     ret['Access'] = access
-    _flatten(ret)
-    return ret
+    if args:
+        ret = dict([(k, ret[k]) for k in args if k in ret])
+        _flatten(ret)
+        return ret
+    else:
+        _flatten(ret)
+        return ret
