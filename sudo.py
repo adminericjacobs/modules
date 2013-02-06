@@ -83,8 +83,11 @@ def ls(*args):
                     break
         else:
             access.append(line)
-    ret['Defaults'] = defaults
-    ret['Access'] = access
+    ret = dict([(k, ret[k]) for k, v in ret.iteritems() if v])
+    if defaults:
+        ret['Defaults'] = defaults
+    if access:
+        ret['Access'] = access
     if args:
         ret = dict([(k, ret[k]) for k in args if k in ret])
         _flatten(ret)
