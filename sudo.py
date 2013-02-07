@@ -1,12 +1,27 @@
 import re
 
 
+def __virtual__():
+    '''
+    Only work on posix-like systems
+    '''
+    # Disable on these platorms, specific service modules exist:
+    disable = ['Windows']
+    if __grains__['os'] in disable:
+        return False
+    return 'sudo'
+
+
 def _read_sudoers():
     #make sure file exists
     f = open('/home/ej321278/salt/_modules/sudoers', 'r')
     sudolist = [line for line in f.read().splitlines()]
     f.close()
     return sudolist
+
+
+def _move_sudoers():
+    return True
 
 
 def append_user(alias_name, data):
@@ -25,20 +40,24 @@ def append_user(alias_name, data):
     return new_sudoers
 
 
-def _move_sudoers():
-    return True
-
-
 def _write_sudoers(wlist):
-    f = open('/home/ej321278/salt/_modules/wsudoers', 'w')
+    f = open('/tmp/sudoers', 'w+')
     for line in wlist:
         f.write("%s\n" % line)
     f.close()
+    cmd = "visudo -c -f /tmp/sudoers"
+    check = __salt__['cmd.run_all'](cmd)
+    if check['retcode']:
+        return check['stderr']
+    return check['stdout']
 
 
 def _flatten(wdict):
     wlist = []
-    aliases = ['Host_Alias', 'User_Alias', 'Cmnd_Alias']
+    aliases = ['Host_Alias',
+               'User_Alias',
+               'Cmnd_Alias',
+               ]
     for alias in aliases:
         if alias in wdict and wdict[alias]:
             for key, val in wdict[alias].iteritems():
