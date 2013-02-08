@@ -1,4 +1,5 @@
 import re
+import shutil
 
 
 def __virtual__():
@@ -25,7 +26,7 @@ def _move_sudoers():
 
 
 def append_user(alias_name, data):
-    aliasRE = re.compile("(\w+)(?=\s*?\=)")
+    aliasRE = re.compile('(\w+)(?=\s*?\=)')
     new_sudoers = []
     for line in _read_sudoers():
         if line.startswith('User_Alias'):
@@ -40,16 +41,17 @@ def append_user(alias_name, data):
     return new_sudoers
 
 
-def _write_sudoers(wlist):
-    f = open('/tmp/sudoers', 'w+')
+def _write_sudoers(wlist, name='sudoers', path='/tmp/'):
+    f = open(path + name, 'w+')
     for line in wlist:
         f.write("%s\n" % line)
     f.close()
-    cmd = "visudo -c -f /tmp/sudoers"
+    cmd = 'visudo -c -f /tmp/sudoers'
     check = __salt__['cmd.run_all'](cmd)
     if check['retcode']:
         return check['stderr']
-    return check['stdout']
+    shutil.copy('/tmp/sudoers2', '/tmp/sudoers2.old')
+    shutil.move('/tmp/sudoers', '/tmp/sudoers2')
 
 
 def _flatten(wdict):
@@ -61,7 +63,7 @@ def _flatten(wdict):
     for alias in aliases:
         if alias in wdict and wdict[alias]:
             for key, val in wdict[alias].iteritems():
-                line = "%s %s = %s " % (alias, key, ', '.join(val))
+                line = '%s %s = %s ' % (alias, key, ', '.join(val))
                 wlist.append(line)
     if 'Defaults' in wdict and wdict['Defaults']:
         for line in wdict['Defaults']:
@@ -69,11 +71,12 @@ def _flatten(wdict):
     if 'Access' in wdict and wdict['Access']:
         for line in wdict['Access']:
             wlist.append(line)
-    _write_sudoers(wlist)
+    msg = _write_sudoers(wlist)
+    return msg
 
 
 def ls(*args):
-    aliasRE = re.compile("(\w+)(?=\s*?\=)")
+    aliasRE = re.compile('(\w+)(?=\s*?\=)')
     defaults = []
     access = []
     ret = {'Host_Alias': {},
@@ -109,8 +112,8 @@ def ls(*args):
         ret['Access'] = access
     if args:
         ret = dict([(k, ret[k]) for k in args if k in ret])
-        _flatten(ret)
-        return ret
+        msg = _flatten(ret)
+        return msg
     else:
-        _flatten(ret)
-        return ret
+        msg = _flatten(ret)
+        return msg
