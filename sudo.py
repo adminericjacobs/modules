@@ -21,10 +21,6 @@ def _read_sudoers():
     return sudolist
 
 
-def _move_sudoers():
-    return True
-
-
 def append_user(alias_name, data):
     aliasRE = re.compile('(\w+)(?=\s*?\=)')
     new_sudoers = []
@@ -41,8 +37,9 @@ def append_user(alias_name, data):
     return new_sudoers
 
 
-def _write_sudoers(wlist, name='sudoers', path='/tmp/'):
-    f = open(path + name, 'w+')
+def _write_sudoers(wlist, name='sudoerssalt', path='/etc/'):
+    #os.path test if it exsists .join
+    f = open('/tmp/sudoers', 'w+')
     for line in wlist:
         f.write("%s\n" % line)
     f.close()
@@ -50,8 +47,8 @@ def _write_sudoers(wlist, name='sudoers', path='/tmp/'):
     check = __salt__['cmd.run_all'](cmd)
     if check['retcode']:
         return check['stderr']
-    shutil.copy('/tmp/sudoers2', '/tmp/sudoers2.old')
-    shutil.move('/tmp/sudoers', '/tmp/sudoers2')
+    shutil.copy('/etc/sudoerssalt', '/etc/sudoerssalt.bak')
+    shutil.move('/tmp/sudoers', '/etc/sudoerssalt')
 
 
 def _flatten(wdict):
