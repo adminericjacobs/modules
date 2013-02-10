@@ -92,7 +92,7 @@ def ls(*args):
         for key, val in ret.iteritems():
             if line.startswith(key):
                 members = line.split('=')[1].split(",")
-                members = [m.lstrip().rstrip() for m in members]
+                members = [m.strip() for m in members]
                 alias = aliasRE.search(line).group(1)
                 if alias in val:
                     val[alias] += members
