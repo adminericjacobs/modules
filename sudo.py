@@ -23,18 +23,18 @@ def _read_sudoers():
 
 def append_user(alias_name, data):
     aliasRE = re.compile('(\w+)(?=\s*?\=)')
-    new_sudoers = []
+    wlist = []
     for line in _read_sudoers():
         if line.startswith('User_Alias'):
             alias = aliasRE.search(line).group(1)
             if alias_name == alias:
                 line += ',' + data
-                new_sudoers.append(line)
+                wlist.append(line)
             else:
-                new_sudoers.append(line)
+                wlist.append(line)
         else:
-            new_sudoers.append(line)
-    return new_sudoers
+            wlist.append(line)
+    return wlist
 
 
 def _write_sudoers(wlist, name='sudoerssalt', path='/etc/'):
