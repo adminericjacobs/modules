@@ -21,11 +21,11 @@ def _read_sudoers():
     return sudolist
 
 
-def append_user(alias_name, data):
+def _append_alias(alias_type, alias_name, data):
     aliasRE = re.compile('(\w+)(?=\s*?\=)')
     wlist = []
     for line in _read_sudoers():
-        if line.startswith('User_Alias'):
+        if line.startswith(alias_type):
             alias = aliasRE.search(line).group(1)
             if alias_name == alias:
                 line += ',' + data
@@ -35,6 +35,12 @@ def append_user(alias_name, data):
         else:
             wlist.append(line)
     return wlist
+
+
+def append_user(alias_name, data):
+    wlist = _append_alias('User_Alias', alias_name, data)
+    ret = _write_sudoers(wlist)
+    return ret
 
 
 def _write_sudoers(wlist, name='sudoerssalt', path='/etc/'):
@@ -49,6 +55,7 @@ def _write_sudoers(wlist, name='sudoerssalt', path='/etc/'):
         return check['stderr']
     shutil.copy('/etc/sudoerssalt', '/etc/sudoerssalt.bak')
     shutil.move('/tmp/sudoers', '/etc/sudoerssalt')
+    return True
 
 
 def _flatten(wdict):
@@ -109,8 +116,6 @@ def ls(*args):
         ret['Access'] = access
     if args:
         ret = dict([(k, ret[k]) for k in args if k in ret])
-        msg = _flatten(ret)
-        return msg
+        return ret
     else:
-        msg = _flatten(ret)
-        return msg
+        return ret
