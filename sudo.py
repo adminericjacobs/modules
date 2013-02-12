@@ -37,8 +37,93 @@ def _append_alias(alias_type, alias_name, data):
     return wlist
 
 
+def _delete_alias(alias_type, alias_name):
+    aliasRE = re.compile('(\w+)(?=\s*?\=)')
+    wlist = []
+    for line in _read_sudoers():
+        if line.startswith(alias_type):
+            alias = aliasRE.search(line).group(1)
+            if alias_name == alias:
+                continue
+            else:
+                wlist.append(line)
+        else:
+            wlist.append(line)
+    return wlist
+
+
+def _set_alias(alias_type, alias_name, data):
+    return "need to write this"
+
+
+def set_user(alias_name, data):
+    wlist = _set_alias('User_Alias', alias_name, data)
+    ret = _write_sudoers(wlist)
+    return ret
+
+
+def set_host(alias_name, data):
+    wlist = _set_alias('Host_Alias', alias_name, data)
+    ret = _write_sudoers(wlist)
+    return ret
+
+
+def set_cmnd(alias_name, data):
+    wlist = _set_alias('Cmnd_Alias', alias_name, data)
+    ret = _write_sudoers(wlist)
+    return ret
+
+
+def set_runas(alias_name, data):
+    wlist = _set_alias('Runas_Alias', alias_name, data)
+    ret = _write_sudoers(wlist)
+    return ret
+
+
 def append_user(alias_name, data):
     wlist = _append_alias('User_Alias', alias_name, data)
+    ret = _write_sudoers(wlist)
+    return ret
+
+
+def append_host(alias_name, data):
+    wlist = _append_alias('Host_Alias', alias_name, data)
+    ret = _write_sudoers(wlist)
+    return ret
+
+
+def append_cmnd(alias_name, data):
+    wlist = _append_alias('Cmnd_Alias', alias_name, data)
+    ret = _write_sudoers(wlist)
+    return ret
+
+
+def append_runas(alias_name, data):
+    wlist = _append_alias('Runas_Alias', alias_name, data)
+    ret = _write_sudoers(wlist)
+    return ret
+
+
+def delete_host(alias_name, data):
+    wlist = _delete_alias('Host_Alias', alias_name)
+    ret = _write_sudoers(wlist)
+    return ret
+
+
+def delete_user(alias_name, data):
+    wlist = _delete_alias('User_Alias', alias_name)
+    ret = _write_sudoers(wlist)
+    return ret
+
+
+def delete_cmnd(alias_name, data):
+    wlist = _delete_alias('Cmnd_Alias', alias_name)
+    ret = _write_sudoers(wlist)
+    return ret
+
+
+def delete_runas(alias_name, data):
+    wlist = _delete_alias('Runas_Alias', alias_name)
     ret = _write_sudoers(wlist)
     return ret
 
