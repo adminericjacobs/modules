@@ -21,7 +21,22 @@ def _read_sudoers():
     return sudolist
 
 
-def _append_alias(alias_type, alias_name, data):
+def _write_sudoers(wlist, name='sudoerssalt', path='/etc/'):
+    #os.path test if it exsists .join
+    f = open('/tmp/sudoers', 'w+')
+    for line in wlist:
+        f.write("%s\n" % line)
+    f.close()
+    cmd = 'visudo -c -f /tmp/sudoers'
+    check = __salt__['cmd.run_all'](cmd)
+    if check['retcode']:
+        return check['stderr']
+    shutil.copy('/etc/sudoerssalt', '/etc/sudoerssalt.bak')
+    shutil.move('/tmp/sudoers', '/etc/sudoerssalt')
+    return True
+
+
+def append_alias(alias_type, alias_name, data):
     aliasRE = re.compile('(\w+)(?=\s*?\=)')
     wlist = []
     for line in _read_sudoers():
@@ -37,7 +52,7 @@ def _append_alias(alias_type, alias_name, data):
     return wlist
 
 
-def _delete_alias(alias_type, alias_name):
+def delete_alias(alias_type, alias_name):
     aliasRE = re.compile('(\w+)(?=\s*?\=)')
     wlist = []
     for line in _read_sudoers():
@@ -52,95 +67,8 @@ def _delete_alias(alias_type, alias_name):
     return wlist
 
 
-def _set_alias(alias_type, alias_name, data):
+def set_alias(alias_type, alias_name, data):
     return "need to write this"
-
-
-def set_user(alias_name, data):
-    wlist = _set_alias('User_Alias', alias_name, data)
-    ret = _write_sudoers(wlist)
-    return ret
-
-
-def set_host(alias_name, data):
-    wlist = _set_alias('Host_Alias', alias_name, data)
-    ret = _write_sudoers(wlist)
-    return ret
-
-
-def set_cmnd(alias_name, data):
-    wlist = _set_alias('Cmnd_Alias', alias_name, data)
-    ret = _write_sudoers(wlist)
-    return ret
-
-
-def set_runas(alias_name, data):
-    wlist = _set_alias('Runas_Alias', alias_name, data)
-    ret = _write_sudoers(wlist)
-    return ret
-
-
-def append_user(alias_name, data):
-    wlist = _append_alias('User_Alias', alias_name, data)
-    ret = _write_sudoers(wlist)
-    return ret
-
-
-def append_host(alias_name, data):
-    wlist = _append_alias('Host_Alias', alias_name, data)
-    ret = _write_sudoers(wlist)
-    return ret
-
-
-def append_cmnd(alias_name, data):
-    wlist = _append_alias('Cmnd_Alias', alias_name, data)
-    ret = _write_sudoers(wlist)
-    return ret
-
-
-def append_runas(alias_name, data):
-    wlist = _append_alias('Runas_Alias', alias_name, data)
-    ret = _write_sudoers(wlist)
-    return ret
-
-
-def delete_host(alias_name, data):
-    wlist = _delete_alias('Host_Alias', alias_name)
-    ret = _write_sudoers(wlist)
-    return ret
-
-
-def delete_user(alias_name, data):
-    wlist = _delete_alias('User_Alias', alias_name)
-    ret = _write_sudoers(wlist)
-    return ret
-
-
-def delete_cmnd(alias_name, data):
-    wlist = _delete_alias('Cmnd_Alias', alias_name)
-    ret = _write_sudoers(wlist)
-    return ret
-
-
-def delete_runas(alias_name, data):
-    wlist = _delete_alias('Runas_Alias', alias_name)
-    ret = _write_sudoers(wlist)
-    return ret
-
-
-def _write_sudoers(wlist, name='sudoerssalt', path='/etc/'):
-    #os.path test if it exsists .join
-    f = open('/tmp/sudoers', 'w+')
-    for line in wlist:
-        f.write("%s\n" % line)
-    f.close()
-    cmd = 'visudo -c -f /tmp/sudoers'
-    check = __salt__['cmd.run_all'](cmd)
-    if check['retcode']:
-        return check['stderr']
-    shutil.copy('/etc/sudoerssalt', '/etc/sudoerssalt.bak')
-    shutil.move('/tmp/sudoers', '/etc/sudoerssalt')
-    return True
 
 
 def _flatten(wdict):
