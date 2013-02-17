@@ -15,7 +15,7 @@ def __virtual__():
 
 def _read_sudoers():
     #make sure file exists
-    f = open('/home/ej321278/salt/_modules/sudoers', 'r')
+    f = open('/etc/sudoerssalt', 'r')
     sudolist = [line for line in f.read().splitlines()]
     f.close()
     return sudolist
@@ -36,7 +36,7 @@ def _write_sudoers(wlist, name='sudoerssalt', path='/etc/'):
     return True
 
 
-def append_alias(alias_type, alias_name, data):
+def alias_append(alias_type, alias_name, data):
     aliasRE = re.compile('(\w+)(?=\s*?\=)')
     wlist = []
     for line in _read_sudoers():
@@ -49,10 +49,11 @@ def append_alias(alias_type, alias_name, data):
                 wlist.append(line)
         else:
             wlist.append(line)
-    return wlist
+    wsudoers = _write_sudoers(wlist)
+    return wsudoers
 
 
-def delete_alias(alias_type, alias_name):
+def alias_delete(alias_type, alias_name):
     aliasRE = re.compile('(\w+)(?=\s*?\=)')
     wlist = []
     for line in _read_sudoers():
@@ -64,10 +65,11 @@ def delete_alias(alias_type, alias_name):
                 wlist.append(line)
         else:
             wlist.append(line)
-    return wlist
+    wsudoers = _write_sudoers(wlist)
+    return wsudoers
 
 
-def set_alias(alias_type, alias_name, data):
+def alias_set(alias_type, alias_name, data):
     return "need to write this"
 
 
