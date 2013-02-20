@@ -40,13 +40,10 @@ def alias_append(alias_type, alias_name, data):
     aliasRE = re.compile('(\w+)(?=\s*?\=)')
     wlist = []
     for line in _read_sudoers():
-        if line.startswith(alias_type):
-            alias = aliasRE.search(line).group(1)
-            if alias_name == alias:
-                line += ',' + data
-                wlist.append(line)
-            else:
-                wlist.append(line)
+        alias = aliasRE.search(line).group(1)
+        if line.startswith(alias_type) and alias_name == alias:
+            line += ',' + data
+            wlist.append(line)
         else:
             wlist.append(line)
     wsudoers = _write_sudoers(wlist)
@@ -57,12 +54,9 @@ def alias_delete(alias_type, alias_name):
     aliasRE = re.compile('(\w+)(?=\s*?\=)')
     wlist = []
     for line in _read_sudoers():
-        if line.startswith(alias_type):
-            alias = aliasRE.search(line).group(1)
-            if alias_name == alias:
-                continue
-            else:
-                wlist.append(line)
+        alias = aliasRE.search(line).group(1)
+        if line.startswith(alias_type) and alias_name == alias:
+            continue
         else:
             wlist.append(line)
     wsudoers = _write_sudoers(wlist)
@@ -70,6 +64,21 @@ def alias_delete(alias_type, alias_name):
 
 
 def alias_set(alias_type, alias_name, data):
+    aliasRE = re.compile('(\w+)(?=\s*?\=)')
+    newalias = "%s %s = %s" % (alias_type, alias_name, data)
+    wlist = []
+    match = False
+    for line in _read_sudoers():
+        alias = aliasRE.search(line).group(1)
+        if line.startswith(alias_type) and alias_name == alias:
+            wlist.append(newalias)
+            match = True
+        else:
+            wlist.append(line)
+    if not match:
+        if wlist[0] not '# Added by Salt':
+            wlist.insert(0, '# Added by Salt')
+        wlist.insert(0, newalias)
     return "need to write this"
 
 
