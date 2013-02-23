@@ -13,12 +13,20 @@ def __virtual__():
     return 'sudo'
 
 
-def _read_sudoers():
+def _sudoers_list():
     #make sure file exists
     f = open('/etc/sudoerssalt', 'r')
-    sudolist = [line for line in f.read().splitlines()]
+    rlist = [line for line in f.read().splitlines()]
     f.close()
-    return sudolist
+    return rlist
+
+
+def _sudoers_string():
+    #make sure file exists
+    f = open('/etc/sudoerssalt', 'r')
+    rstring = f.read()
+    f.close()
+    return rstring
 
 
 def _write_sudoers(wlist, name='sudoerssalt', path='/etc/'):
@@ -39,7 +47,7 @@ def _write_sudoers(wlist, name='sudoerssalt', path='/etc/'):
 def alias_append(alias_type, alias_name, data):
     aliasRE = re.compile('(\w+)(?=\s*?\=)')
     wlist = []
-    for line in _read_sudoers():
+    for line in _sudoers_list():
         if line.startswith(alias_type):
             alias = aliasRE.search(line).group(1)
             if alias_name == alias:
@@ -54,9 +62,13 @@ def alias_append(alias_type, alias_name, data):
 
 
 def alias_delete(alias_type, alias_name):
+    #pattern = '\s*(%s)\s*(%s)' % (alias_type, alias_name)
+    #regex = re.compile(pattern)
+    #rstring = _sudoers_string()
+    #if re.search(regex, s)
     aliasRE = re.compile('(\w+)(?=\s*?\=)')
     wlist = []
-    for line in _read_sudoers():
+    for line in _sudoers_list():
         if line.startswith(alias_type):
             alias = aliasRE.search(line).group(1)
             if alias_name == alias:
@@ -68,14 +80,15 @@ def alias_delete(alias_type, alias_name):
     wsudoers = _write_sudoers(wlist)
     return wsudoers
 
+
 def alias_set(alias_type, alias_name, data):
     aliasRE = re.compile('(\w+)(?=\s*?\=)')
     newalias = "%s %s = %s" % (alias_type, alias_name, data)
     wlist = []
-    rlist = _read_sudoers()
+    rlist = _sudoers_list()
     match = False
     written = False
-    for line in _read_sudoers():
+    for line in _sudoers_list():
         if line.startswith(alias_type):
             alias = aliasRE.search(line).group(1)
             if alias_name == alias:
@@ -87,7 +100,7 @@ def alias_set(alias_type, alias_name, data):
             wlist.append(line)
     if not match:
         wlist = []
-        for line in _read_sudoers():
+        for line in _sudoers_list():
             if line.startswith('#'):
                 wlist.append(line)
                 continue
@@ -133,7 +146,7 @@ def ls(*args):
            'User_Alias': {},
            'Cmnd_Alias': {},
            }
-    for line in _read_sudoers():
+    for line in _sudoers_list():
         if not line:
             continue
         if line.startswith('#'):
