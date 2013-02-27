@@ -44,79 +44,6 @@ def _write_sudoers(wlist, name='sudoerssalt', path='/etc/'):
     return True
 
 
-def alias_append(alias_type, alias_name, data):
-    aliasRE = re.compile('(\w+)(?=\s*?\=)')
-    wlist = []
-    for line in _sudoers_list():
-        if line.startswith(alias_type):
-            alias = aliasRE.search(line).group(1)
-            if alias_name == alias:
-                line += ',' + data
-                wlist.append(line)
-            else:
-                wlist.append(line)
-        else:
-            wlist.append(line)
-    wsudoers = _write_sudoers(wlist)
-    return wsudoers
-
-
-def alias_delete(alias_type, alias_name):
-    #pattern = '\s*(%s)\s*(%s)' % (alias_type, alias_name)
-    #regex = re.compile(pattern)
-    #rstring = _sudoers_string()
-    #if re.search(regex, s)
-    aliasRE = re.compile('(\w+)(?=\s*?\=)')
-    wlist = []
-    for line in _sudoers_list():
-        if line.startswith(alias_type):
-            alias = aliasRE.search(line).group(1)
-            if alias_name == alias:
-                continue
-            else:
-                wlist.append(line)
-        else:
-            wlist.append(line)
-    wsudoers = _write_sudoers(wlist)
-    return wsudoers
-
-
-def alias_set(alias_type, alias_name, data):
-    aliasRE = re.compile('(\w+)(?=\s*?\=)')
-    newalias = "%s %s = %s" % (alias_type, alias_name, data)
-    wlist = []
-    rlist = _sudoers_list()
-    match = False
-    written = False
-    for line in _sudoers_list():
-        if line.startswith(alias_type):
-            alias = aliasRE.search(line).group(1)
-            if alias_name == alias:
-                wlist.append(newalias)
-                match = True
-            else:
-                wlist.append(line)
-        else:
-            wlist.append(line)
-    if not match:
-        wlist = []
-        for line in _sudoers_list():
-            if line.startswith('#'):
-                wlist.append(line)
-                continue
-            if not written:
-                if '# Added by Salt' in rlist:
-                    wlist.append(newalias)
-                    written = True
-                else:
-                    wlist.append('# Added by Salt')
-                    wlist.append(newalias)
-                    written = True
-            wlist.append(line)
-    wsudoers = _write_sudoers(wlist)
-    return wsudoers
-
-
 def _flatten(wdict):
     wlist = []
     aliases = ['Host_Alias',
@@ -136,6 +63,69 @@ def _flatten(wdict):
             wlist.append(line)
     msg = _write_sudoers(wlist)
     return msg
+
+
+def alias_append(alias_type, alias_name, data):
+    pattern = '\s*(%s)\s*(%s)(?=\s*?\=)' % (alias_type, alias_name)
+    aliasRE = re.compile(pattern)
+    wlist = []
+    for line in _sudoers_list():
+        if re.search(aliasRE, line):
+            line += ',' + data
+            wlist.append(line)
+        else:
+            wlist.append(line)
+    wsudoers = _write_sudoers(wlist)
+    return wsudoers
+
+
+def alias_delete(alias_type, alias_name):
+    pattern = '\s*(%s)\s*(%s)(?=\s*?\=)' % (alias_type, alias_name)
+    aliasRE = re.compile(pattern)
+    wlist = []
+    for line in _sudoers_list():
+        if re.search(aliasRE, line):
+            continue
+        else:
+            wlist.append(line)
+    wsudoers = _write_sudoers(wlist)
+    return wsudoers
+
+
+def alias_set(alias_type, alias_name, data):
+    pattern = '\s*(%s)\s*(%s)(?=\s*?\=)' % (alias_type, alias_name)
+    aliasRE = re.compile(pattern)
+    newalias = "%s %s = %s" % (alias_type, alias_name, data)
+    rlist = _sudoers_list()
+    rstring = _sudoers_string()
+    written = False
+    wlist = []
+    if re.search(aliasRE, rstring):
+        for line in rlist:
+            if re.search(aliasRE, line):
+                wlist.append(newalias)
+            else:
+                wlist.append(line)
+    else:
+        wlist = []
+        for line in rlist:
+            if not line:
+                wlist.append(line)
+                continue
+            if line.startswith('#'):
+                wlist.append(line)
+                continue
+            if not written:
+                if '# Added by Salt' in rlist:
+                    wlist.append(newalias)
+                    written = True
+                else:
+                    wlist.append('# Added by Salt')
+                    wlist.append(newalias)
+                    written = True
+            wlist.append(line)
+    wsudoers = _write_sudoers(wlist)
+    return wsudoers
 
 
 def ls(*args):
